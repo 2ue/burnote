@@ -1,0 +1,288 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    /* 月白 - 淡雅的青白色 (默认主题) */
+    --primary: 200 18% 46%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    /* 缥 - 淡青色 */
+    --accent: 180 25% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 200 18% 46%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    /* 深色模式 - 月白 */
+    --primary: 200 20% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    /* 深色模式 - 缥 */
+    --accent: 180 28% 60%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 200 20% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* 主题色系统 - 必须在 @layer 外面以确保正确的优先级 */
+
+/* Theme 1: 竹青 */
+.theme-1 {
+  --primary: 160 40% 45%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 165 35% 55%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 160 40% 45%;
+}
+.theme-1.dark {
+  --primary: 160 42% 52%;
+  --accent: 165 38% 60%;
+  --ring: 160 42% 52%;
+}
+
+/* Theme 2: 黛 */
+.theme-2 {
+  --primary: 210 30% 35%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 200 25% 50%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 210 30% 35%;
+}
+.theme-2.dark {
+  --primary: 210 28% 45%;
+  --accent: 200 25% 58%;
+  --ring: 210 28% 45%;
+}
+
+/* Theme 3: 藕荷 */
+.theme-3 {
+  --primary: 320 28% 62%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 310 25% 70%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 320 28% 62%;
+}
+.theme-3.dark {
+  --primary: 320 30% 68%;
+  --accent: 310 28% 75%;
+  --ring: 320 30% 68%;
+}
+
+/* Theme 4: 秋香 */
+.theme-4 {
+  --primary: 40 45% 50%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 45 40% 58%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 40 45% 50%;
+}
+.theme-4.dark {
+  --primary: 40 48% 58%;
+  --accent: 45 42% 65%;
+  --ring: 40 48% 58%;
+}
+
+/* Theme 5: 胭脂 */
+.theme-5 {
+  --primary: 350 65% 50%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 355 60% 60%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 350 65% 50%;
+}
+.theme-5.dark {
+  --primary: 350 60% 55%;
+  --accent: 355 55% 65%;
+  --ring: 350 60% 55%;
+}
+
+/* Theme 6: 石青 */
+.theme-6 {
+  --primary: 195 65% 42%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 190 55% 52%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 195 65% 42%;
+}
+.theme-6.dark {
+  --primary: 195 60% 50%;
+  --accent: 190 52% 58%;
+  --ring: 195 60% 50%;
+}
+
+/* Theme 7: 豆绿 */
+.theme-7 {
+  --primary: 140 50% 45%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 150 45% 52%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 140 50% 45%;
+}
+.theme-7.dark {
+  --primary: 140 52% 52%;
+  --accent: 150 48% 60%;
+  --ring: 140 52% 52%;
+}
+
+/* Theme 8: 赤金 */
+.theme-8 {
+  --primary: 15 85% 55%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 25 90% 60%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 15 85% 55%;
+}
+.theme-8.dark {
+  --primary: 15 80% 60%;
+  --accent: 25 85% 65%;
+  --ring: 15 80% 60%;
+}
+
+/* Theme 9: 靛蓝 */
+.theme-9 {
+  --primary: 235 75% 48%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 240 70% 58%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 235 75% 48%;
+}
+.theme-9.dark {
+  --primary: 235 72% 55%;
+  --accent: 240 68% 65%;
+  --ring: 235 72% 55%;
+}
+
+/* Theme 10: 孔雀蓝 */
+.theme-10 {
+  --primary: 185 85% 42%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 180 80% 50%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 185 85% 42%;
+}
+.theme-10.dark {
+  --primary: 185 80% 50%;
+  --accent: 180 75% 58%;
+  --ring: 185 80% 50%;
+}
+
+/* Theme 11: 朱砂 */
+.theme-11 {
+  --primary: 5 90% 55%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 10 85% 62%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 5 90% 55%;
+}
+.theme-11.dark {
+  --primary: 5 85% 60%;
+  --accent: 10 80% 68%;
+  --ring: 5 85% 60%;
+}
+
+/* Theme 12: 暗夜 */
+.theme-12 {
+  --primary: 220 25% 25%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 215 22% 35%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 220 25% 25%;
+}
+.theme-12.dark {
+  --primary: 220 22% 35%;
+  --accent: 215 20% 45%;
+  --ring: 220 22% 35%;
+}
+
+/* Theme 13: 森林 */
+.theme-13 {
+  --primary: 150 60% 35%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 155 55% 45%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 150 60% 35%;
+}
+.theme-13.dark {
+  --primary: 150 58% 42%;
+  --accent: 155 52% 52%;
+  --ring: 150 58% 42%;
+}
+
+/* Theme 14: 海洋 */
+.theme-14 {
+  --primary: 210 85% 45%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 205 80% 52%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 210 85% 45%;
+}
+.theme-14.dark {
+  --primary: 210 82% 52%;
+  --accent: 205 78% 60%;
+  --ring: 210 82% 52%;
+}
+
+/* Theme 15: 日落 */
+.theme-15 {
+  --primary: 20 95% 55%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 25 90% 62%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 20 95% 55%;
+}
+.theme-15.dark {
+  --primary: 20 92% 62%;
+  --accent: 25 88% 68%;
+  --ring: 20 92% 62%;
+}

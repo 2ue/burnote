@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>主题测试</title>
+  <style>
+    :root {
+      --primary: 200 18% 46%;
+    }
+    .theme-1 { --primary: 160 40% 45%; }
+    .theme-5 { --primary: 350 65% 50%; }
+    .theme-10 { --primary: 185 85% 42%; }
+
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .box {
+      width: 200px;
+      height: 100px;
+      background: hsl(var(--primary));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>主题切换测试</h1>
+  <div class="box">当前主题颜色</div>
+
+  <div>
+    <button onclick="setTheme(0)">月白 (默认)</button>
+    <button onclick="setTheme(1)">竹青</button>
+    <button onclick="setTheme(5)">胭脂</button>
+    <button onclick="setTheme(10)">孔雀蓝</button>
+  </div>
+
+  <div id="info"></div>
+
+  <script>
+    function setTheme(id) {
+      const root = document.documentElement;
+
+      // 移除所有主题类
+      for (let i = 0; i <= 15; i++) {
+        root.classList.remove(`theme-${i}`);
+      }
+
+      // 应用新主题
+      if (id !== 0) {
+        root.classList.add(`theme-${id}`);
+      }
+
+      // 显示信息
+      const primary = getComputedStyle(root).getPropertyValue('--primary');
+      document.getElementById('info').innerHTML =
+        `<p>当前主题ID: ${id}</p>
+         <p>HTML class: ${root.className || '(无)'}</p>
+         <p>--primary 值: ${primary}</p>`;
+    }
+
+    // 初始化显示
+    setTheme(0);
+  </script>
+</body>
+</html>

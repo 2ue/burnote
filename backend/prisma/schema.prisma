@@ -1,0 +1,24 @@
+// Prisma schema for Modern Share
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Share {
+  id          String    @id @default(cuid())
+  content     String    // 分享的文本内容
+  password    String?   // bcrypt哈希后的密码(可选)
+  maxViews    Int?      // 最大浏览次数,null表示无限制
+  viewCount   Int       @default(0) // 当前浏览次数
+  expiresAt   DateTime? // 过期时间,null表示永不过期
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([createdAt])
+  @@index([expiresAt])
+}
