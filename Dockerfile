@@ -38,8 +38,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install nginx and pnpm
-RUN apk add --no-cache nginx supervisor && \
+# Install nginx, supervisor (Python 3 version), and pnpm
+RUN apk update && \
+    apk add --no-cache nginx py3-supervisor && \
     npm install -g pnpm@10.18.2
 
 # Setup backend
