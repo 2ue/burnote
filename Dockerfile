@@ -38,20 +38,18 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install nginx, supervisor (Python 3 version), and pnpm
-RUN apk update && \
-    apk add --no-cache nginx py3-supervisor && \
+# Install nginx and pnpm (with retry for network reliability)
+RUN for i in 1 2 3; do \
+        apk add --no-cache nginx && break || sleep 5; \
+    done && \
     npm install -g pnpm@10.18.2
 
-# Setup backend
-COPY backend/package.json backend/pnpm-lock.yaml ./backend/
-WORKDIR /app/backend
-RUN pnpm install --prod --frozen-lockfile
-
+# Setup backend - copy built files and generated Prisma client
 WORKDIR /app
 COPY --from=backend-builder /app/backend/dist ./backend/dist
-COPY --from=backend-builder /app/backend/node_modules/.prisma ./backend/node_modules/.prisma
+COPY --from=backend-builder /app/backend/node_modules ./backend/node_modules
 COPY --from=backend-builder /app/backend/prisma ./backend/prisma
+COPY backend/package.json backend/pnpm-lock.yaml ./backend/
 
 # Setup frontend
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
@@ -59,12 +57,13 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 # Setup nginx
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
-# Setup supervisor
-COPY supervisord.conf /etc/supervisord.conf
+# Copy startup script
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
 # Create data directory
 RUN mkdir -p /app/data
 
 EXPOSE 3500
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["/app/start.sh"]
