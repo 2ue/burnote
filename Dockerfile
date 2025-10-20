@@ -1,91 +1,69 @@
-# ============================================
-# Burnote - Single Container Deployment
-# ============================================
-# Architecture:
-# - Frontend: Vite/React (static files served by Nginx)
-# - Backend: NestJS + Prisma + SQLite (Node.js)
-# - Reverse Proxy: Nginx (frontend @ / + backend @ /api)
-#
-# Runtime Configuration:
-# - Frontend env vars injected at container startup (no rebuild needed)
-# - Backend env vars loaded from Docker environment
-# ============================================
-
-# ============================================
-# Stage 1: Build Frontend
-# ============================================
-FROM node:20-alpine AS frontend-builder
-
-WORKDIR /build
-
-# Copy package files and install dependencies
-COPY frontend/package*.json ./
-RUN npm ci --only=production=false
-
-# Copy source and build with placeholder (will be replaced at runtime)
-COPY frontend/ ./
-ENV VITE_API_URL=__VITE_API_URL_PLACEHOLDER__
-RUN npm run build
-
-# ============================================
-# Stage 2: Build Backend
-# ============================================
+# Stage 1: Build backend
 FROM node:20-alpine AS backend-builder
 
-WORKDIR /build
+WORKDIR /app/backend
 
-# Copy package files
-COPY backend/package*.json ./
-COPY backend/prisma ./prisma/
+# Install pnpm
+RUN npm install -g pnpm@10.18.2
 
-# Install all dependencies (including devDependencies for build)
-RUN npm ci --only=production=false
+# Install backend dependencies
+COPY backend/package.json backend/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# Generate Prisma client
-RUN npx prisma generate
-
-# Copy source and build
+# Copy backend source and build
 COPY backend/ ./
-RUN npm run build
+RUN pnpm prisma generate
+RUN pnpm build
 
-# Clean install production dependencies only
-RUN npm ci --only=production && npm cache clean --force
+# Stage 2: Build frontend
+FROM node:20-alpine AS frontend-builder
 
-# ============================================
-# Stage 3: Production Runtime
-# ============================================
+WORKDIR /app/frontend
+
+# Install pnpm
+RUN npm install -g pnpm@10.18.2
+
+# Install frontend dependencies
+COPY frontend/package.json frontend/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# Copy frontend source and build
+COPY frontend/ ./
+# Use relative path for API calls (nginx will proxy /api to backend)
+ENV VITE_API_URL=/api
+RUN pnpm build
+
+# Stage 3: Production
 FROM node:20-alpine
-
-# Install nginx and bash
-RUN apk add --no-cache nginx bash
 
 WORKDIR /app
 
-# Copy backend built files
-COPY --from=backend-builder /build/dist ./backend/dist
-COPY --from=backend-builder /build/node_modules ./backend/node_modules
-COPY --from=backend-builder /build/prisma ./backend/prisma
-COPY --from=backend-builder /build/package.json ./backend/
+# Install nginx and pnpm
+RUN apk add --no-cache nginx supervisor && \
+    npm install -g pnpm@10.18.2
 
-# Copy frontend built files to nginx html directory
-COPY --from=frontend-builder /build/dist /usr/share/nginx/html
+# Setup backend
+COPY backend/package.json backend/pnpm-lock.yaml ./backend/
+WORKDIR /app/backend
+RUN pnpm install --prod --frozen-lockfile
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+WORKDIR /app
+COPY --from=backend-builder /app/backend/dist ./backend/dist
+COPY --from=backend-builder /app/backend/node_modules/.prisma ./backend/node_modules/.prisma
+COPY --from=backend-builder /app/backend/prisma ./backend/prisma
 
-# Copy and setup entrypoint script
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+# Setup frontend
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# Create necessary directories
-RUN mkdir -p /app/data /run/nginx
+# Setup nginx
+COPY nginx.conf /etc/nginx/http.d/default.conf
 
-# Expose port
-EXPOSE 80
+# Setup supervisor
+COPY supervisord.conf /etc/supervisord.conf
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+# Create data directory
+RUN mkdir -p /app/data
 
-# Run entrypoint script
-ENTRYPOINT ["/docker-entrypoint.sh"]
+EXPOSE 3500
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

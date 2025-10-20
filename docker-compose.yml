@@ -1,46 +1,15 @@
-# ============================================
-# Burnote Docker Compose Configuration
-# ============================================
-# Single-container deployment with volume persistence
-# ============================================
+version: '3.8'
 
 services:
   burnote:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: burnote:latest
-    container_name: burnote
-    restart: unless-stopped
-    
+    build: .
     ports:
-      - "80:80"
-    
-    volumes:
-      # Persist SQLite database
-      - burnote-data:/app/data
-    
+      - "3500:3500"
     environment:
-      # Frontend Configuration
-      VITE_API_URL: /api
-      
-      # Backend Configuration
-      DATABASE_URL: file:/app/data/burnote.db
-      PORT: 3000
-      NODE_ENV: production
-      CORS_ORIGIN: "*"
-      
-      # Admin Authentication (CHANGE THIS!)
-      # Generate bcrypt hash: node -e "console.log(require('bcrypt').hashSync('your-password', 10))"
-      ADMIN_PASSWORD: change-me-to-secure-password
-    
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:admin123}
+    volumes:
+      - burnote-data:/app/data
+    restart: unless-stopped
 
 volumes:
   burnote-data:
-    driver: local

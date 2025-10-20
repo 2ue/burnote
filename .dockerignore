@@ -1,87 +1,12 @@
-# ============================================
-# Docker Ignore File
-# ============================================
-# Exclude unnecessary files from Docker build context
-# to reduce build time and image size
-# ============================================
-
-# Git
+node_modules
+dist
+.env
+.env.local
+*.log
 .git
 .gitignore
-.gitattributes
-
-# Documentation
 README.md
-docs/
-*.md
-
-# Node modules (will be installed during build)
-**/node_modules
-**/npm-debug.log
-**/.npm
-
-# Development files
-**/.env
-**/.env.local
-**/.env.development
-**/.env.test
-
-# Build artifacts (will be rebuilt)
-**/dist
-**/build
-**/.next
-**/.nuxt
-
-# Testing
-**/coverage
-**/.nyc_output
-**/test
-**/tests
-**/__tests__
-**/*.test.js
-**/*.test.ts
-**/*.spec.js
-**/*.spec.ts
-
-# IDE and editor files
-.vscode
-.idea
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Database files (development)
-**/dev.db
-**/dev.db-journal
-**/*.db
-**/*.db-journal
-
-# Logs
-**/logs
-**/*.log
-**/pnpm-debug.log*
-**/yarn-debug.log*
-**/yarn-error.log*
-**/lerna-debug.log*
-
-# Cache
-**/.cache
-**/.parcel-cache
-**/.eslintcache
-**/.stylelintcache
-
-# Temporary files
-**/tmp
-**/temp
-**/.tmp
-
-# Docker files (not needed inside the image)
-Dockerfile*
-docker-compose*.yml
-.dockerignore
-
-# CI/CD
-.github
-.gitlab-ci.yml
-.travis.yml
+docs
+backend/dev.db
+backend/dev.db-journal
+backend/.data

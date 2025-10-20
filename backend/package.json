@@ -1,6 +1,6 @@
 {
   "name": "burnote-backend",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Burnote - Secure temporary text sharing platform backend",
   "scripts": {
     "build": "nest build",
