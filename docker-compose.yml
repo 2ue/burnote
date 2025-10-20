@@ -6,7 +6,8 @@ services:
     ports:
       - "3500:3500"
     environment:
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:admin123}
+      # Optional: Override defaults if needed
+      # - ADMIN_PASSWORD=your-secure-password
     volumes:
       - burnote-data:/app/data
     restart: unless-stopped

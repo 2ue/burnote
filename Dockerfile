@@ -44,14 +44,15 @@ RUN for i in 1 2 3; do \
     done && \
     npm install -g pnpm@10.18.2
 
-# Setup backend - copy built files and generated Prisma client
-WORKDIR /app
-COPY --from=backend-builder /app/backend/dist ./backend/dist
-COPY --from=backend-builder /app/backend/node_modules ./backend/node_modules
-COPY --from=backend-builder /app/backend/prisma ./backend/prisma
+# Setup backend - copy built files and install production dependencies
 COPY backend/package.json backend/pnpm-lock.yaml ./backend/
+WORKDIR /app/backend
+RUN pnpm install --prod --frozen-lockfile
+COPY --from=backend-builder /app/backend/dist ./dist
+COPY --from=backend-builder /app/backend/prisma ./prisma
 
 # Setup frontend
+WORKDIR /app
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Setup nginx
