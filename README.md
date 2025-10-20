@@ -23,7 +23,7 @@ Burnote 是一个安全的临时文本分享平台。支持密码保护、阅读
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/burnote.git
+git clone https://github.com/2ue/burnote.git
 cd burnote
 
 # 启动服务
@@ -38,24 +38,24 @@ docker-compose up -d
 
 从GitHub Container Registry拉取：
 ```bash
-docker pull ghcr.io/yourusername/burnote:latest
+docker pull ghcr.io/2ue/burnote:latest
 docker run -d \
   -p 3500:3500 \
   -e ADMIN_PASSWORD=your-secure-password \
   -v burnote-data:/app/data \
   --name burnote \
-  ghcr.io/yourusername/burnote:latest
+  ghcr.io/2ue/burnote:latest
 ```
 
 从Docker Hub拉取：
 ```bash
-docker pull yourusername/burnote:latest
+docker pull 2ue/burnote:latest
 docker run -d \
   -p 3500:3500 \
   -e ADMIN_PASSWORD=your-secure-password \
   -v burnote-data:/app/data \
   --name burnote \
-  yourusername/burnote:latest
+  2ue/burnote:latest
 ```
 
 ### 生产环境配置
