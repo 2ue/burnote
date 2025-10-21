@@ -50,6 +50,7 @@ WORKDIR /app/backend
 RUN pnpm install --prod --frozen-lockfile
 COPY --from=backend-builder /app/backend/dist ./dist
 COPY --from=backend-builder /app/backend/prisma ./prisma
+COPY --from=backend-builder /app/backend/node_modules/.prisma ./node_modules/.prisma
 
 # Setup frontend
 WORKDIR /app
