@@ -12,7 +12,7 @@ nginx
 
 # Run database migrations
 cd /app/backend
-pnpm prisma migrate deploy
+npx prisma migrate deploy
 
 # Start backend (foreground)
 exec node dist/main
