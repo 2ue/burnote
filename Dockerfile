@@ -3,12 +3,17 @@ FROM node:20-alpine AS backend-builder
 
 WORKDIR /app/backend
 
+# Install build dependencies including OpenSSL and tools for native modules
+RUN apk add --no-cache openssl openssl-dev python3 make g++
+
 # Install pnpm
 RUN npm install -g pnpm@10.18.2
 
 # Install backend dependencies
 COPY backend/package.json backend/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# Install with build scripts enabled for native modules
+RUN pnpm config set enable-pre-post-scripts true && \
+    pnpm install --frozen-lockfile --ignore-scripts=false
 
 # Copy backend source and build
 COPY backend/ ./
@@ -38,9 +43,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install nginx and pnpm (with retry for network reliability)
+# Install nginx, OpenSSL and pnpm (with retry for network reliability)
 RUN for i in 1 2 3; do \
-        apk add --no-cache nginx && break || sleep 5; \
+        apk add --no-cache nginx openssl && break || sleep 5; \
     done && \
     npm install -g pnpm@10.18.2
 
