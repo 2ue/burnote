@@ -10,7 +10,7 @@ export NODE_ENV=${NODE_ENV:-production}
 # Start nginx in background
 nginx
 
-# Run database migrations
+# Run database migrations (Prisma Client already generated at build time)
 cd /app/backend
 npx prisma migrate deploy
 
