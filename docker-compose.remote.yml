@@ -1,6 +1,6 @@
 services:
   burnote:
-    image: burnote:latest  # Use locally built image
+    image: ghcr.io/2ue/burnote:latest  # Use locally built image
     container_name: burnote
     restart: unless-stopped
     ports:
