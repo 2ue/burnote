@@ -1,98 +1,105 @@
-# Stage 1: Build backend
-FROM node:20-alpine AS backend-builder
-
-WORKDIR /app/backend
-
-# Install build dependencies including OpenSSL and tools for native modules
-RUN apk add --no-cache openssl openssl-dev python3 make g++
-
-# Install pnpm
-RUN npm install -g pnpm@10.18.2
-
-# Copy package files
-COPY backend/package.json backend/pnpm-lock.yaml ./
-
-# Install all dependencies (including devDependencies for build)
-RUN pnpm config set enable-pre-post-scripts true && \
-    pnpm install --frozen-lockfile --ignore-scripts=false
-
-# Copy prisma schema and migrations
-COPY backend/prisma ./prisma
-
-# Generate Prisma Client (MUST be before build)
-RUN pnpm run prisma:generate
-
-# Copy source code and config files
-COPY backend/src ./src
-COPY backend/nest-cli.json ./
-COPY backend/tsconfig.json ./
-
-# Build NestJS application
-RUN pnpm run build
-
-# Stage 2: Build frontend
+# ============================================
+# Stage 1: Build Frontend
+# ============================================
 FROM node:20-alpine AS frontend-builder
 
-WORKDIR /app/frontend
+WORKDIR /build
 
-# Install pnpm
-RUN npm install -g pnpm@10.18.2
+# Install pnpm using corepack (uses version specified in package.json)
+RUN corepack enable pnpm
 
-# Copy package files
+# Copy frontend package files
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install frontend dependencies
+RUN pnpm install
 
-# Copy source code
-COPY frontend/ ./
+# Copy frontend source
+COPY frontend/ .
 
-# Build frontend (API calls will be proxied by nginx)
+# Build frontend (use /api for production API calls via nginx proxy)
 ENV VITE_API_URL=/api
 RUN pnpm run build
 
-# Stage 3: Production
+
+# ============================================
+# Stage 2: Build Backend
+# ============================================
+FROM node:20-alpine AS backend-builder
+
+WORKDIR /build
+
+# No build dependencies needed (using Node.js built-in crypto)
+
+# Install pnpm using corepack (uses version specified in package.json)
+RUN corepack enable pnpm
+
+# Copy backend package files
+COPY backend/package.json backend/pnpm-lock.yaml ./
+
+# Install backend dependencies
+RUN pnpm install
+
+# Copy backend source (including Prisma schema)
+COPY backend/ .
+
+# Generate Prisma Client with Linux musl target
+RUN npx prisma generate
+
+# Build backend
+RUN pnpm run build
+
+
+# ============================================
+# Stage 3: Production Image
+# ============================================
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Install nginx, OpenSSL and pnpm (with retry for network reliability)
-RUN for i in 1 2 3; do \
-        apk add --no-cache nginx openssl && break || sleep 5; \
-    done && \
-    npm install -g pnpm@10.18.2
+# Install system dependencies
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    openssl
 
-# Setup backend directory structure
-WORKDIR /app/backend
+# Create necessary directories
+RUN mkdir -p \
+    /app/backend \
+    /app/data \
+    /usr/share/nginx/html \
+    /run/nginx \
+    /var/log/supervisor
 
-# Copy package files (needed for pnpm to work with copied node_modules)
-COPY backend/package.json backend/pnpm-lock.yaml ./
+# Copy frontend build artifacts
+COPY --from=frontend-builder /build/dist /usr/share/nginx/html
 
-# Copy COMPLETE node_modules from builder (includes @prisma/client and .prisma)
-COPY --from=backend-builder /app/backend/node_modules ./node_modules
+# Copy backend build artifacts and dependencies
+COPY --from=backend-builder /build/dist /app/backend/dist
+COPY --from=backend-builder /build/node_modules /app/backend/node_modules
+COPY --from=backend-builder /build/package.json /app/backend/package.json
+COPY --from=backend-builder /build/prisma /app/backend/prisma
 
-# Copy built application
-COPY --from=backend-builder /app/backend/dist ./dist
-
-# Copy Prisma artifacts (schema + migrations)
-COPY --from=backend-builder /app/backend/prisma ./prisma
-
-# Setup frontend
-WORKDIR /app
-COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
-
-# Setup nginx configuration
+# Copy configuration files
 COPY nginx.conf /etc/nginx/http.d/default.conf
-
-# Copy startup script
+COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY start.sh /app/start.sh
+
+# Make start script executable
 RUN chmod +x /app/start.sh
 
-# Create data directory for SQLite database
-RUN mkdir -p /app/data
+# Set environment variables with defaults
+ENV NODE_ENV=production \
+    PORT=3501 \
+    DATABASE_URL=file:/app/data/burnote.db \
+    CORS_ORIGIN=http://localhost:3500
 
-# Expose port
+# Expose frontend port (nginx)
 EXPOSE 3500
 
-# Start application
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:3500/ || exit 1
+
+# Start supervisor (manages nginx and node)
 CMD ["/app/start.sh"]

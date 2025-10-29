@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   burnote:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: burnote:latest  # Use locally built image
     container_name: burnote
     restart: unless-stopped
     ports:

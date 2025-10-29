@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { verifyPassword } from '../utils/password';
 
 @Injectable()
 export class AdminService {
@@ -11,10 +11,10 @@ export class AdminService {
       return false;
     }
 
-    // 支持明文比对(仅开发环境)和bcrypt哈希比对
-    if (adminPassword.startsWith('$2')) {
-      // bcrypt哈希
-      return bcrypt.compare(password, adminPassword);
+    // 支持明文比对(仅开发环境)和scrypt哈希比对
+    if (adminPassword.startsWith('ey')) {
+      // scrypt哈希（我们的新格式，base64编码的JSON）
+      return verifyPassword(adminPassword, password);
     } else {
       // 明文比对(仅用于开发)
       return password === adminPassword;

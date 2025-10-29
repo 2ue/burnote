@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, UnauthorizedException, BadRequestExcepti
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateShareDto } from './dto/create-share.dto';
 import { ViewShareDto } from './dto/view-share.dto';
-import * as bcrypt from 'bcrypt';
+import { hashPassword, verifyPassword } from '../utils/password';
 import { nanoid } from 'nanoid';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class SharesService {
     const id = nanoid(10);
 
     // 如果有密码,进行哈希
-    const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+    const hashedPassword = password ? await hashPassword(password) : null;
 
     // 创建分享
     const share = await this.prisma.share.create({
@@ -62,7 +62,7 @@ export class SharesService {
       if (!viewShareDto?.password) {
         throw new UnauthorizedException('需要密码');
       }
-      const isPasswordValid = await bcrypt.compare(viewShareDto.password, share.password);
+      const isPasswordValid = await verifyPassword(share.password, viewShareDto.password);
       if (!isPasswordValid) {
         throw new UnauthorizedException('密码错误');
       }

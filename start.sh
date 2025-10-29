@@ -1,18 +1,23 @@
 #!/bin/sh
 set -e
 
-# Set default environment variables if not provided
-export DATABASE_URL=${DATABASE_URL:-"file:/app/data/burnote.db"}
-export ADMIN_PASSWORD=${ADMIN_PASSWORD:-"admin123"}
-export PORT=${PORT:-3501}
-export NODE_ENV=${NODE_ENV:-production}
+echo "🔥 Starting Burnote..."
 
-# Start nginx in background
-nginx
-
-# Run database migrations (Prisma Client already generated at build time)
+# Change to backend directory
 cd /app/backend
-npx prisma migrate deploy
 
-# Start backend (foreground)
-exec node dist/main
+# Initialize database (idempotent - safe to run multiple times)
+echo "📦 Initializing database..."
+npx prisma db push --skip-generate
+
+# Verify database
+if [ -f "/app/data/burnote.db" ]; then
+    echo "✅ Database initialized at /app/data/burnote.db"
+else
+    echo "❌ Database initialization failed"
+    exit 1
+fi
+
+# Start supervisor (manages nginx and backend)
+echo "🚀 Starting services..."
+exec supervisord -c /etc/supervisor/supervisord.conf
