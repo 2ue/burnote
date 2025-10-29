@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Moon, Sun, Palette } from 'lucide-react';
+import { Moon, Sun, Palette, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,14 +14,14 @@ import { themeColors } from '@/theme-config';
 type Mode = 'light' | 'dark';
 
 export function ThemeSwitcher() {
-  const [themeId, setThemeId] = useState<number>(0);
+  const [themeId, setThemeId] = useState<number>(8); // 默认使用赤金主题
   const [mode, setMode] = useState<Mode>('light');
 
   useEffect(() => {
     const savedThemeId = localStorage.getItem('themeId');
     const savedMode = localStorage.getItem('mode') as Mode | null;
 
-    const id = savedThemeId ? parseInt(savedThemeId) : 0;
+    const id = savedThemeId ? parseInt(savedThemeId) : 8;
     setThemeId(id);
     if (savedMode) setMode(savedMode);
 
@@ -105,7 +105,7 @@ export function ThemeSwitcher() {
             <DropdownMenuItem
               key={theme.id}
               onClick={() => handleThemeChange(theme.id)}
-              className={`group ${themeId === theme.id ? 'bg-accent' : ''}`}
+              className={`group relative ${themeId === theme.id ? 'bg-accent text-accent-foreground' : ''}`}
             >
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
@@ -115,7 +115,10 @@ export function ThemeSwitcher() {
                   />
                   <span>{theme.name}</span>
                 </div>
-                <span className="text-xs text-muted-foreground group-data-[highlighted]:text-accent-foreground transition-colors">{theme.description}</span>
+                <div className="flex items-center gap-2">
+                  {themeId === theme.id && <Check className="w-4 h-4 text-accent-foreground" />}
+                  <span className="text-xs text-muted-foreground group-data-[highlighted]:text-accent-foreground transition-colors">{theme.description}</span>
+                </div>
               </div>
             </DropdownMenuItem>
           ))}
@@ -126,7 +129,7 @@ export function ThemeSwitcher() {
             <DropdownMenuItem
               key={theme.id}
               onClick={() => handleThemeChange(theme.id)}
-              className={`group ${themeId === theme.id ? 'bg-accent' : ''}`}
+              className={`group relative ${themeId === theme.id ? 'bg-accent text-accent-foreground' : ''}`}
             >
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
@@ -136,7 +139,10 @@ export function ThemeSwitcher() {
                   />
                   <span>{theme.name}</span>
                 </div>
-                <span className="text-xs text-muted-foreground group-data-[highlighted]:text-accent-foreground transition-colors">{theme.description}</span>
+                <div className="flex items-center gap-2">
+                  {themeId === theme.id && <Check className="w-4 h-4 text-accent-foreground" />}
+                  <span className="text-xs text-muted-foreground group-data-[highlighted]:text-accent-foreground transition-colors">{theme.description}</span>
+                </div>
               </div>
             </DropdownMenuItem>
           ))}
@@ -147,7 +153,7 @@ export function ThemeSwitcher() {
             <DropdownMenuItem
               key={theme.id}
               onClick={() => handleThemeChange(theme.id)}
-              className={`group ${themeId === theme.id ? 'bg-accent' : ''}`}
+              className={`group relative ${themeId === theme.id ? 'bg-accent text-accent-foreground' : ''}`}
             >
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
@@ -157,7 +163,10 @@ export function ThemeSwitcher() {
                   />
                   <span>{theme.name}</span>
                 </div>
-                <span className="text-xs text-muted-foreground group-data-[highlighted]:text-accent-foreground transition-colors">{theme.description}</span>
+                <div className="flex items-center gap-2">
+                  {themeId === theme.id && <Check className="w-4 h-4 text-accent-foreground" />}
+                  <span className="text-xs text-muted-foreground group-data-[highlighted]:text-accent-foreground transition-colors">{theme.description}</span>
+                </div>
               </div>
             </DropdownMenuItem>
           ))}
@@ -168,7 +177,7 @@ export function ThemeSwitcher() {
             <DropdownMenuItem
               key={theme.id}
               onClick={() => handleThemeChange(theme.id)}
-              className={`group ${themeId === theme.id ? 'bg-accent' : ''}`}
+              className={`group relative ${themeId === theme.id ? 'bg-accent text-accent-foreground' : ''}`}
             >
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
@@ -178,7 +187,10 @@ export function ThemeSwitcher() {
                   />
                   <span>{theme.name}</span>
                 </div>
-                <span className="text-xs text-muted-foreground group-data-[highlighted]:text-accent-foreground transition-colors">{theme.description}</span>
+                <div className="flex items-center gap-2">
+                  {themeId === theme.id && <Check className="w-4 h-4 text-accent-foreground" />}
+                  <span className="text-xs text-muted-foreground group-data-[highlighted]:text-accent-foreground transition-colors">{theme.description}</span>
+                </div>
               </div>
             </DropdownMenuItem>
           ))}
