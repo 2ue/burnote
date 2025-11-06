@@ -5,14 +5,14 @@ FROM node:20-alpine AS frontend-builder
 
 WORKDIR /build
 
-# Install pnpm using corepack (uses version specified in package.json)
-RUN corepack enable pnpm
+# Install pnpm using corepack (specify version to match lockfile)
+RUN corepack enable && corepack prepare pnpm@7.33.7 --activate
 
 # Copy frontend package files
 COPY frontend/package.json frontend/pnpm-lock.yaml ./
 
 # Install frontend dependencies
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 # Copy frontend source
 COPY frontend/ .
@@ -29,22 +29,25 @@ FROM node:20-alpine AS backend-builder
 
 WORKDIR /build
 
-# No build dependencies needed (using Node.js built-in crypto)
+# Install OpenSSL development packages (required for Prisma)
+# Use Aliyun mirror for better connectivity in China
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache openssl openssl-dev
 
-# Install pnpm using corepack (uses version specified in package.json)
-RUN corepack enable pnpm
+# Install pnpm using corepack (specify version to match lockfile)
+RUN corepack enable && corepack prepare pnpm@7.33.7 --activate
 
 # Copy backend package files
 COPY backend/package.json backend/pnpm-lock.yaml ./
 
-# Install backend dependencies
-RUN pnpm install
+# Install backend dependencies (including devDependencies for build)
+RUN pnpm install --frozen-lockfile
 
 # Copy backend source (including Prisma schema)
 COPY backend/ .
 
-# Generate Prisma Client with Linux musl target
-RUN npx prisma generate
+# Generate Prisma Client (for TypeScript types during build)
+RUN pnpm run prisma:generate
 
 # Build backend
 RUN pnpm run build
@@ -57,11 +60,17 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apk add --no-cache \
+# Install system dependencies (including openssl-dev for Prisma)
+# Use Aliyun mirror for better connectivity in China
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache \
     nginx \
     supervisor \
-    openssl
+    openssl \
+    openssl-dev
+
+# Install pnpm using corepack (specify version to match lockfile)
+RUN corepack enable && corepack prepare pnpm@7.33.7 --activate
 
 # Create necessary directories
 RUN mkdir -p \
@@ -74,14 +83,25 @@ RUN mkdir -p \
 # Copy frontend build artifacts
 COPY --from=frontend-builder /build/dist /usr/share/nginx/html
 
-# Copy backend build artifacts and dependencies
-COPY --from=backend-builder /build/dist /app/backend/dist
-COPY --from=backend-builder /build/node_modules /app/backend/node_modules
+# Copy backend package files and source files
 COPY --from=backend-builder /build/package.json /app/backend/package.json
+COPY --from=backend-builder /build/pnpm-lock.yaml /app/backend/pnpm-lock.yaml
+COPY --from=backend-builder /build/dist /app/backend/dist
 COPY --from=backend-builder /build/prisma /app/backend/prisma
 
+# Install production dependencies only
+WORKDIR /app/backend
+RUN pnpm install --prod --frozen-lockfile
+
+# Copy the generated Prisma Client from builder stage
+# Prisma 5.x stores everything in @prisma/client (includes binary engines)
+COPY --from=backend-builder /build/node_modules/@prisma /app/backend/node_modules/@prisma
+
+# Back to app root
+WORKDIR /app
+
 # Copy configuration files
-COPY nginx.conf /etc/nginx/http.d/default.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY start.sh /app/start.sh
 

@@ -12,7 +12,7 @@ services:
       # Backend configuration
       - NODE_ENV=production
       - PORT=3501
-      - DATABASE_URL=file:./data/burnote.db
+      - DATABASE_URL=file:/app/data/burnote.db
       - CORS_ORIGIN=http://localhost:3900
     volumes:
       # Persist database
